@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Providence Phone Repair Shop | Instant Repair Quote</title>
-  <meta name="description" content="Providence Phone Repair Shop – Fast iPhone, Samsung, and laptop repairs. Get an instant repair quote online.">
+  <title>Instant Repair Quote | Providence Phone Repair</title>
+  <meta name="description" content="Providence Phone Repair Shop – iPhone, Samsung, laptop & tablet repairs with same-day service. Get your instant quote online.">
   <meta name="keywords" content="Providence phone repair, iPhone repair Providence, Samsung repair Providence, laptop repair Providence">
-  <link rel="alternate" hreflang="es" href="https://yourdomain.com/es/" />
   <link rel="alternate" hreflang="en" href="https://yourdomain.com/en/" />
+  <link rel="alternate" hreflang="es" href="https://yourdomain.com/es/" />
   <style>
     :root { --primary:#007bff; --primaryDark:#0056b3; --border:#ddd; --text:#333; }
     body { font-family: Arial, sans-serif; background: #f9f9f9; padding: 40px; }
@@ -31,11 +31,17 @@
     .slot.selected { background: #007bff; color: white; border-color: #0056b3; }
     #confirmBtn { display: none; margin-top: 15px; width: 100%; padding: 12px; background: green; color: white; border: none; font-size: 16px; border-radius: 5px; cursor: pointer; }
     #confirmBtn:hover { background: darkgreen; }
+    .lang-switch { text-align: right; margin-bottom: 10px; }
+    .lang-switch a { color: #007bff; text-decoration: none; font-weight: bold; }
+    .lang-switch a:hover { text-decoration: underline; }
   </style>
 </head>
 <body>
   <div class="container">
-    <p><a href="/es/">🇪🇸 Español</a></p>
+    <div class="lang-switch">
+      <a href="/es/">Español</a>
+    </div>
+
     <h2>Welcome! Get Your Instant Repair Quote</h2>
 
     <form id="quoteForm" novalidate>
@@ -70,7 +76,154 @@
   </div>
 
   <script>
-    // same JS logic from before, English messages only
+    const form = document.getElementById("quoteForm");
+    const responseBox = document.getElementById("responseBox");
+    const submitBtn = document.getElementById("submitBtn");
+    const appointmentBox = document.getElementById("appointmentBox");
+    const confirmBtn = document.getElementById("confirmBtn");
+
+    let selectedSlot = null;
+    let userData = {};
+
+    function showStatus(text, type = "") {
+      responseBox.className = "";
+      if (type) responseBox.classList.add(type);
+      if (!text) {
+        responseBox.classList.add("hidden");
+        responseBox.textContent = "";
+        return;
+      }
+      responseBox.classList.remove("hidden");
+      responseBox.innerHTML = text;
+    }
+
+    function fallbackCallLink() {
+      return `<br><br>If this keeps happening, please <a href="tel:4019990100">call our store at 401-999-0100</a>.`;
+    }
+
+    function formatHour(h) {
+      const suffix = h >= 12 ? "PM" : "AM";
+      const hour = ((h + 11) % 12 + 1);
+      return `${hour} ${suffix}`;
+    }
+
+    function generateHourlySlots(startHour, endHour) {
+      const slots = [];
+      for (let h = startHour; h < endHour; h++) {
+        slots.push(`${formatHour(h)} – ${formatHour(h + 1)}`);
+      }
+      return slots;
+    }
+
+    function generateSlots() {
+      const today = new Date();
+      const day = today.getDay(); // 0 = Sunday
+      if (day === 0) {
+        return generateHourlySlots(11, 17); // 11–5
+      } else {
+        return generateHourlySlots(10, 19); // 10–7
+      }
+    }
+
+    function showAppointments(data) {
+      userData = data;
+      selectedSlot = null;
+      confirmBtn.style.display = "none";
+
+      const slots = generateSlots();
+      appointmentBox.innerHTML = "<h3>Select an Appointment Window:</h3>" +
+        slots.map(s => `<div class="slot">${s}</div>`).join("");
+      appointmentBox.classList.remove("hidden");
+
+      appointmentBox.querySelectorAll(".slot").forEach(slot => {
+        slot.addEventListener("click", () => {
+          appointmentBox.querySelectorAll(".slot").forEach(s => s.classList.remove("selected"));
+          slot.classList.add("selected");
+          selectedSlot = slot.textContent;
+          confirmBtn.style.display = "block";
+        });
+      });
+    }
+
+    confirmBtn.addEventListener("click", async () => {
+      if (!selectedSlot) return;
+
+      try {
+        const res = await fetch("https://instantrepair.up.railway.app/webhook-test/email", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: userData.Name,
+            phone: userData.Phone,
+            email: userData.Email,
+            brand: userData.Brand,
+            deviceType: userData.DeviceType,
+            deviceModel: userData.DeviceModel,
+            issue: userData.Issue,
+            selectedSlot: selectedSlot
+          })
+        });
+        if (res.ok) {
+          showStatus(`✅ Appointment confirmed for ${selectedSlot}`, "success");
+          confirmBtn.style.display = "none";
+        } else {
+          showStatus("⚠️ Could not confirm appointment. Try again." + fallbackCallLink(), "error");
+        }
+      } catch (err) {
+        showStatus("Network error sending appointment: " + err.message + fallbackCallLink(), "error");
+      }
+    });
+
+    form.querySelectorAll("input").forEach(input => {
+      input.addEventListener("input", () => {
+        if (input.value.trim() !== "") {
+          input.classList.remove("invalid");
+        }
+      });
+    });
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      if (!form.checkValidity()) {
+        showStatus("⚠️ Please fill all required fields.", "error");
+        form.querySelectorAll("input[required]").forEach(input => {
+          if (!input.value.trim()) input.classList.add("invalid");
+        });
+        return;
+      }
+
+      const formData = new FormData(form);
+      const data = Object.fromEntries(formData.entries());
+
+      submitBtn.disabled = true;
+      showStatus('<span class="spinner"></span>Please wait, I am calculating…');
+
+      try {
+        const res = await fetch("https://instantrepair.up.railway.app/webhook/4827ed8d-3a15-472e-80fd-719078b7438c", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data)
+        });
+
+        const raw = await res.text();
+        let messageText = "";
+        try {
+          const j = JSON.parse(raw);
+          messageText = j.message || raw;
+        } catch {
+          messageText = raw;
+        }
+
+        showStatus(messageText, res.ok ? "success" : "error");
+        if (res.ok) showAppointments(data);
+
+      } catch (err) {
+        showStatus("Network error: " + err.message + fallbackCallLink(), "error");
+      } finally {
+        submitBtn.disabled = false;
+      }
+    });
   </script>
 </body>
 </html>
