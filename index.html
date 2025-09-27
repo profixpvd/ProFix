@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Cotización Instantánea de Reparación Providence | Providence Phone Repair</title>
-  <meta name="description" content="Reparación de teléfonos en Providence – iPhone, Samsung, laptops y más. Cotización instantánea en línea y servicio el mismo día.">
-  <meta name="keywords" content="reparación teléfonos Providence, reparar iPhone Providence, reparar Samsung Providence, laptop reparación Providence">
+  <title>Instant Repair Quote | Providence Phone Repair</title>
+  <meta name="description" content="Providence Phone Repair Shop – iPhone, Samsung, laptop & tablet repairs with same-day service. Get your instant quote online.">
+  <meta name="keywords" content="Providence phone repair, iPhone repair Providence, Samsung repair Providence, laptop repair Providence">
   <link rel="alternate" hreflang="en" href="https://profixpvd.com/en/" />
   <link rel="alternate" hreflang="es" href="https://profixpvd.com/es/" />
   <style>
@@ -39,40 +39,40 @@
 <body>
   <div class="container">
     <div class="lang-switch">
-      <a href="/en/">English</a>
+      <a href="/es/">Español</a>
     </div>
 
-    <h2>¡Bienvenido! Obtén tu Cotización Instantánea</h2>
+    <h2>Welcome! Get Your Instant Repair Quote</h2>
 
     <form id="quoteForm" novalidate>
-      <label for="Name">Nombre</label>
+      <label for="Name">Name</label>
       <input type="text" id="Name" name="Name" required>
 
-      <label for="Phone">Número de Teléfono</label>
+      <label for="Phone">Phone Number</label>
       <input type="tel" id="Phone" name="Phone" required>
 
-      <label for="Brand">Marca (Apple, Samsung, etc.)</label>
+      <label for="Brand">Brand (Apple, Samsung, etc.)</label>
       <input type="text" id="Brand" name="Brand" required>
 
-      <label for="Issue">Problema</label>
+      <label for="Issue">Issue</label>
       <input type="text" id="Issue" name="Issue" required>
 
-      <label for="Email">Correo Electrónico</label>
+      <label for="Email">Email</label>
       <input type="email" id="Email" name="Email" required>
 
-      <label for="DeviceType">Tipo de Dispositivo (Teléfono, Tableta, Laptop)</label>
+      <label for="DeviceType">Device Type (Phone, Tablet, Laptop)</label>
       <input type="text" id="DeviceType" name="DeviceType" required>
 
-      <label for="DeviceModel">Modelo del Dispositivo (ej. iPhone 11, Samsung A15)</label>
+      <label for="DeviceModel">Device Model (e.g. iPhone 11, Samsung A15)</label>
       <input type="text" id="DeviceModel" name="DeviceModel" required>
 
-      <button id="submitBtn" type="submit">Obtener Cotización</button>
-      <div class="muted">Tu información solo se usa para generar una cotización y contactarte.</div>
+      <button id="submitBtn" type="submit">Get Quote</button>
+      <div class="muted">Your info is only used to generate a quote and contact you.</div>
     </form>
 
     <div id="responseBox" class="hidden" role="status" aria-live="polite"></div>
     <div id="appointmentBox" class="hidden"></div>
-    <button id="confirmBtn">Confirmar Cita</button>
+    <button id="confirmBtn">Confirm Appointment</button>
   </div>
 
   <script>
@@ -98,7 +98,7 @@
     }
 
     function fallbackCallLink() {
-      return `<br><br>Si esto sigue ocurriendo, por favor <a href="tel:4019990100">llama a nuestra tienda al 401-999-0100</a>.`;
+      return `<br><br>If this keeps happening, please <a href="tel:4019990100">call our store at 401-999-0100</a>.`;
     }
 
     function formatHour(h) {
@@ -117,7 +117,7 @@
 
     function generateSlots() {
       const today = new Date();
-      const day = today.getDay(); // 0 = Domingo
+      const day = today.getDay(); // 0 = Sunday
       if (day === 0) {
         return generateHourlySlots(11, 17); // 11–5
       } else {
@@ -131,7 +131,7 @@
       confirmBtn.style.display = "none";
 
       const slots = generateSlots();
-      appointmentBox.innerHTML = "<h3>Selecciona un Horario de Cita:</h3>" +
+      appointmentBox.innerHTML = "<h3>Select an Appointment Window:</h3>" +
         slots.map(s => `<div class="slot">${s}</div>`).join("");
       appointmentBox.classList.remove("hidden");
 
@@ -164,13 +164,13 @@
           })
         });
         if (res.ok) {
-          showStatus(`✅ Cita confirmada para ${selectedSlot}`, "success");
+          showStatus(`✅ Appointment confirmed for ${selectedSlot}`, "success");
           confirmBtn.style.display = "none";
         } else {
-          showStatus("⚠️ No se pudo confirmar la cita. Inténtalo de nuevo." + fallbackCallLink(), "error");
+          showStatus("⚠️ Could not confirm appointment. Try again." + fallbackCallLink(), "error");
         }
       } catch (err) {
-        showStatus("Error de red al enviar la cita: " + err.message + fallbackCallLink(), "error");
+        showStatus("Network error sending appointment: " + err.message + fallbackCallLink(), "error");
       }
     });
 
@@ -186,7 +186,7 @@
       e.preventDefault();
 
       if (!form.checkValidity()) {
-        showStatus("⚠️ Por favor completa todos los campos requeridos.", "error");
+        showStatus("⚠️ Please fill all required fields.", "error");
         form.querySelectorAll("input[required]").forEach(input => {
           if (!input.value.trim()) input.classList.add("invalid");
         });
@@ -197,7 +197,7 @@
       const data = Object.fromEntries(formData.entries());
 
       submitBtn.disabled = true;
-      showStatus('<span class="spinner"></span>Por favor espera, calculando tu cotización…');
+      showStatus('<span class="spinner"></span>Please wait, I am calculating…');
 
       try {
         const res = await fetch("https://instantrepair.up.railway.app/webhook/4827ed8d-3a15-472e-80fd-719078b7438c", {
@@ -219,7 +219,7 @@
         if (res.ok) showAppointments(data);
 
       } catch (err) {
-        showStatus("Error de red: " + err.message + fallbackCallLink(), "error");
+        showStatus("Network error: " + err.message + fallbackCallLink(), "error");
       } finally {
         submitBtn.disabled = false;
       }
