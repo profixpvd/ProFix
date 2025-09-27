@@ -48,8 +48,37 @@
       <label for="Name">Name</label>
       <input type="text" id="Name" name="Name" required>
 
-      <label for="Phone">Phone Number</label>
-      <input type="tel" id="Phone" name="Phone" required>
+<label for="Phone">Phone Number</label>
+<input type="tel" id="Phone" name="Phone" required placeholder="e.g. 4019990100">
+
+<script>
+  const phoneInput = document.getElementById("Phone");
+
+  phoneInput.addEventListener("input", () => {
+    let val = phoneInput.value;
+
+    // Remove all characters except digits and plus sign
+    val = val.replace(/[^\d+]/g, '');
+
+    // If doesn't start with +1, add it
+    if (!val.startsWith('+1')) {
+      // Remove all + signs and add +1
+      val = '+1' + val.replace(/\+/g, '');
+    }
+
+    // Extract digits after +1
+    let digits = val.slice(2).replace(/\D/g, '');
+
+    // Limit to max 10 digits
+    if (digits.length > 10) {
+      digits = digits.slice(0, 10);
+    }
+
+    // Set the final value
+    phoneInput.value = '+1' + digits;
+  });
+</script>
+
 
       <label for="Brand">Brand (Apple, Samsung, etc.)</label>
       <input type="text" id="Brand" name="Brand" required>
