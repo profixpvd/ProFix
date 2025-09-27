@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Cotización Instantánea de Reparación | Providence Phone Repair</title>
+  <meta name="description" content="Reparación de teléfonos en Providence – iPhone, Samsung, laptops y más. Cotización instantánea en línea y servicio el mismo día.">
+  <meta name="keywords" content="reparación teléfonos Providence, reparar iPhone Providence, reparar Samsung Providence, laptop reparación Providence">
+  <link rel="alternate" hreflang="en" href="https://yourdomain.com/en/" />
+  <link rel="alternate" hreflang="es" href="https://yourdomain.com/es/" />
+  <style>
+    :root { --primary:#007bff; --primaryDark:#0056b3; --border:#ddd; --text:#333; }
+    body { font-family: Arial, sans-serif; background: #f9f9f9; padding: 40px; }
+    .container { max-width: 500px; margin: 0 auto; background: #fff; padding: 20px 30px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+    h2 { text-align: center; color: var(--text); margin-top: 0; }
+    label { display: block; margin-top: 15px; font-weight: bold; }
+    input { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 5px; transition: border-color 0.3s, background 0.3s; }
+    input.invalid { border-color: #e6b8b8; background: linear-gradient(180deg, #fff 60%, #ffecec 100%); }
+    button { margin-top: 20px; width: 100%; padding: 12px; background: var(--primary); border: none; color: white; font-size: 16px; border-radius: 5px; cursor: pointer; }
+    button:hover { background: var(--primaryDark); }
+    #responseBox { margin-top: 20px; padding: 15px; border-radius: 6px; border: 1px solid var(--border); background: #f5f7fb; color: #0b1a33; min-height: 20px; }
+    #responseBox.hidden { display: none; }
+    #responseBox.success { background: #eefaf1; color: #0f5132; border-color: #badbcc; }
+    #responseBox.error { background: #fdecea; color: #842029; border-color: #f5c2c7; }
+    .muted { color:#666; font-size: 12px; margin-top: 8px; }
+    .spinner { display: inline-block; width: 16px; height: 16px; vertical-align: -3px; border: 2px solid #c9d5ff; border-top-color: var(--primary); border-radius: 50%; animation: spin .8s linear infinite; margin-right: 8px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #appointmentBox { margin-top: 15px; }
+    .slot { display: block; margin: 6px 0; padding: 10px; background: #f0f6ff; border: 1px solid #cbdaf8; border-radius: 5px; cursor: pointer; transition: background 0.3s; }
+    .slot:hover { background: #e0ecff; }
+    .slot.selected { background: #007bff; color: white; border-color: #0056b3; }
+    #confirmBtn { display: none; margin-top: 15px; width: 100%; padding: 12px; background: green; color: white; border: none; font-size: 16px; border-radius: 5px; cursor: pointer; }
+    #confirmBtn:hover { background: darkgreen; }
+    .lang-switch { text-align: right; margin-bottom: 10px; }
+    .lang-switch a { color: #007bff; text-decoration: none; font-weight: bold; }
+    .lang-switch a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="lang-switch">
+      <a href="/en/">English</a>
+    </div>
+
+    <h2>¡Bienvenido! Obtén tu Cotización Instantánea</h2>
+
+    <form id="quoteForm" novalidate>
+      <label for="Name">Nombre</label>
+      <input type="text" id="Name" name="Name" required>
+
+      <label for="Phone">Número de Teléfono</label>
+      <input type="tel" id="Phone" name="Phone" required>
+
+      <label for="Brand">Marca (Apple, Samsung, etc.)</label>
+      <input type="text" id="Brand" name="Brand" required>
+
+      <label for="Issue">Problema</label>
+      <input type="text" id="Issue" name="Issue" required>
+
+      <label for="Email">Correo Electrónico</label>
+      <input type="email" id="Email" name="Email" required>
+
+      <label for="DeviceType">Tipo de Dispositivo (Teléfono, Tableta, Laptop)</label>
+      <input type="text" id="DeviceType" name="DeviceType" required>
+
+      <label for="DeviceModel">Modelo del Dispositivo (ej. iPhone 11, Samsung A15)</label>
+      <input type="text" id="DeviceModel" name="DeviceModel" required>
+
+      <button id="submitBtn" type="submit">Obtener Cotización</button>
+      <div class="muted">Tu información solo se usa para generar una cotización y contactarte.</div>
+    </form>
+
+    <div id="responseBox" class="hidden" role="status" aria-live="polite"></div>
+    <div id="appointmentBox" class="hidden"></div>
+    <button id="confirmBtn">Confirmar Cita</button>
+  </div>
+
+  <script>
+    const form = document.getElementById("quoteForm");
+    const responseBox = document.getElementById("responseBox");
+    const submitBtn = document.getElementById("submitBtn");
+    const appointmentBox = document.getElementById("appointmentBox");
+    const confirmBtn = document.getElementById("confirmBtn");
+
+    let selectedSlot = null;
+    let userData = {};
+
+    function showStatus(text, type = "") {
+      responseBox.className = "";
+      if (type) responseBox.classList.add(type);
+      if (!text) {
+        responseBox.classList.add("hidden");
+        responseBox.textContent = "";
+        return;
+      }
+      responseBox.classList.remove("hidden");
+      responseBox.innerHTML = text;
+    }
+
+    function fallbackCallLink() {
+      return `<br><br>Si esto sigue ocurriendo, por favor <a href="tel:4019990100">llama a nuestra tienda al 401-999-0100</a>.`;
+    }
+
+    function formatHour(h) {
+      const suffix = h >= 12 ? "PM" : "AM";
+      const hour = ((h + 11) % 12 + 1);
+      return `${hour} ${suffix}`;
+    }
+
+    function generateHourlySlots(startHour, endHour) {
+      const slots = [];
+      for (let h = startHour; h < endHour; h++) {
+        slots.push(`${formatHour(h)} – ${formatHour(h + 1)}`);
+      }
+      return slots;
+    }
+
+    function generateSlots() {
+      const today = new Date();
+      const day = today.getDay(); // 0 = Domingo
+      if (day === 0) {
+        return generateHourlySlots(11, 17); // 11–5
+      } else {
+        return generateHourlySlots(10, 19); // 10–7
+      }
+    }
+
+    function showAppointments(data) {
+      userData = data;
+      selectedSlot = null;
+      confirmBtn.style.display = "none";
+
+      const slots = generateSlots();
+      appointmentBox.innerHTML = "<h3>Selecciona un Horario de Cita:</h3>" +
+        slots.map(s => `<div class="slot">${s}</div>`).join("");
+      appointmentBox.classList.remove("hidden");
+
+      appointmentBox.querySelectorAll(".slot").forEach(slot => {
+        slot.addEventListener("click", () => {
+          appointmentBox.querySelectorAll(".slot").forEach(s => s.classList.remove("selected"));
+          slot.classList.add("selected");
+          selectedSlot = slot.textContent;
+          confirmBtn.style.display = "block";
+        });
+      });
+    }
+
+    confirmBtn.addEventListener("click", async () => {
+      if (!selectedSlot) return;
+
+      try {
+        const res = await fetch("https://instantrepair.up.railway.app/webhook-test/email", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: userData.Name,
+            phone: userData.Phone,
+            email: userData.Email,
+            brand: userData.Brand,
+            deviceType: userData.DeviceType,
+            deviceModel: userData.DeviceModel,
+            issue: userData.Issue,
+            selectedSlot: selectedSlot
+          })
+        });
+        if (res.ok) {
+          showStatus(`✅ Cita confirmada para ${selectedSlot}`, "success");
+          confirmBtn.style.display = "none";
+        } else {
+          showStatus("⚠️ No se pudo confirmar la cita. Inténtalo de nuevo." + fallbackCallLink(), "error");
+        }
+      } catch (err) {
+        showStatus("Error de red al enviar la cita: " + err.message + fallbackCallLink(), "error");
+      }
+    });
+
+    form.querySelectorAll("input").forEach(input => {
+      input.addEventListener("input", () => {
+        if (input.value.trim() !== "") {
+          input.classList.remove("invalid");
+        }
+      });
+    });
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      if (!form.checkValidity()) {
+        showStatus("⚠️ Por favor completa todos los campos requeridos.", "error");
+        form.querySelectorAll("input[required]").forEach(input => {
+          if (!input.value.trim()) input.classList.add("invalid");
+        });
+        return;
+      }
+
+      const formData = new FormData(form);
+      const data = Object.fromEntries(formData.entries());
+
+      submitBtn.disabled = true;
+      showStatus('<span class="spinner"></span>Por favor espera, calculando tu cotización…');
+
+      try {
+        const res = await fetch("https://instantrepair.up.railway.app/webhook/4827ed8d-3a15-472e-80fd-719078b7438c", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data)
+        });
+
+        const raw = await res.text();
+        let messageText = "";
+        try {
+          const j = JSON.parse(raw);
+          messageText = j.message || raw;
+        } catch {
+          messageText = raw;
+        }
+
+        showStatus(messageText, res.ok ? "success" : "error");
+        if (res.ok) showAppointments(data);
+
+      } catch (err) {
+        showStatus("Error de red: " + err.message + fallbackCallLink(), "error");
+      } finally {
+        submitBtn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
