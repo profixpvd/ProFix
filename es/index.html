@@ -49,8 +49,7 @@
       <input type="text" id="Name" name="Name" required>
 
       <label for="Phone">Número de Teléfono</label>
-  <input type="tel" id="Phone" name="Phone" pattern="[2-9][0-9]{2}[2-9][0-9]{2}[0-9]{4}" maxlength="10" placeholder="10 dígitos de EE.UU." required>
-  <div class="muted">Solo números de EE.UU. (+1). Ejemplo: 4015551234</div>
+      <input type="tel" id="Phone" name="Phone" required>
 
       <label for="Brand">Marca (Apple, Samsung, etc.)</label>
       <input type="text" id="Brand" name="Brand" required>
@@ -185,18 +184,6 @@
 
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
-
-      // Validación de teléfono de EE.UU.
-      const phoneInput = document.getElementById('Phone');
-      const phone = phoneInput.value.replace(/\D/g, '');
-      if (!/^([2-9][0-9]{2}[2-9][0-9]{2}[0-9]{4})$/.test(phone)) {
-        phoneInput.classList.add('invalid');
-        showStatus('Por favor ingresa un número válido de 10 dígitos de EE.UU.', 'error');
-        phoneInput.focus();
-        return;
-      } else {
-        phoneInput.classList.remove('invalid');
-      }
 
       if (!form.checkValidity()) {
         showStatus("⚠️ Por favor completa todos los campos requeridos.", "error");

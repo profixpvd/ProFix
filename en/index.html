@@ -49,8 +49,7 @@
       <input type="text" id="Name" name="Name" required>
 
       <label for="Phone">Phone Number</label>
-  <input type="tel" id="Phone" name="Phone" pattern="[2-9][0-9]{2}[2-9][0-9]{2}[0-9]{4}" maxlength="10" placeholder="10-digit US number" required>
-  <div class="muted">US numbers only (+1). Example: 4015551234</div>
+      <input type="tel" id="Phone" name="Phone" required>
 
       <label for="Brand">Brand (Apple, Samsung, etc.)</label>
       <input type="text" id="Brand" name="Brand" required>
@@ -77,7 +76,7 @@
   </div>
 
   <script>
-  const form = document.getElementById("quoteForm");
+    const form = document.getElementById("quoteForm");
     const responseBox = document.getElementById("responseBox");
     const submitBtn = document.getElementById("submitBtn");
     const appointmentBox = document.getElementById("appointmentBox");
@@ -185,18 +184,6 @@
 
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
-
-      // US phone validation
-      const phoneInput = document.getElementById('Phone');
-      const phone = phoneInput.value.replace(/\D/g, '');
-      if (!/^([2-9][0-9]{2}[2-9][0-9]{2}[0-9]{4})$/.test(phone)) {
-        phoneInput.classList.add('invalid');
-        showStatus('Please enter a valid 10-digit US phone number.', 'error');
-        phoneInput.focus();
-        return;
-      } else {
-        phoneInput.classList.remove('invalid');
-      }
 
       if (!form.checkValidity()) {
         showStatus("⚠️ Please fill all required fields.", "error");
