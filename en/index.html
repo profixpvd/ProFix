@@ -178,7 +178,7 @@
       if (!selectedSlot) return;
 
       try {
-        const res = await fetch("https://instantrepair.up.railway.app/webhook/email", {
+        const res = await fetch("https://n8n.profixpvd.com/webhook/4827ed8d-3a15-472e-80fd-719078b7438c", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -229,7 +229,7 @@
       showStatus('<span class="spinner"></span>Please wait, I am calculating…');
 
       try {
-        const res = await fetch("https://instantrepair.up.railway.app/webhook/4827ed8d-3a15-472e-80fd-719078b7438c", {
+        const res = await fetch("https://n8n.profixpvd.com/webhook/4827ed8d-3a15-472e-80fd-719078b7438c", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(data)
