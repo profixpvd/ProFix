@@ -1,0 +1,16 @@
+{
+  "name": "profix-website",
+  "version": "1.0.0",
+  "description": "ProFix Phone Repair Website",
+  "main": "index.html",
+  "scripts": {
+    "start": "serve -s . -p $PORT",
+    "dev": "serve -s . -p 3000"
+  },
+  "dependencies": {
+    "serve": "^14.2.1"
+  },
+  "keywords": ["phone-repair", "providence", "website"],
+  "author": "ProFix PVD",
+  "license": "MIT"
+}
